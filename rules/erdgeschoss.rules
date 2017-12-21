@@ -1,0 +1,186 @@
+val sonnenuntergang=17
+val sonnenaufgang=9
+
+//Generische Regeln für IFTTT / Google Assistant Phrase mit variablen zum Licht ausschalten
+rule "Generische Regeln für IFTTT Licht an"
+when Item LightOff_String received update
+then
+
+	var auswahl=LightOff_String.state.toString
+	logInfo("wohnzimmer.rules", "Licht aus im Raum "+auswahl)
+	if(auswahl.contains("Küche")){
+		Kueche_Helligkeit.sendCommand(0)
+	}
+	if(auswahl.contains("Wohnzimmer")){
+		Tisch_Helligkeit.sendCommand(0)
+	}
+	if(auswahl.contains("Stehlampe")){
+		Stehlampe_Helligkeit.sendCommand(0)
+	}
+	if(auswahl.contains("Tisch")){
+		Tisch_Helligkeit.sendCommand(0)
+	}
+	if(auswahl.contains("Schlafzimmer")){
+		Schlafzimmer_Helligkeit.sendCommand(0)
+	}
+	if(auswahl.contains("Erdgeschoss")){
+		Erdgeschloss_Switch.sendCommand(OFF)
+	}
+end
+
+//Generische Regeln für IFTTT / Google Assistant Phrase mit variablen zum Licht ausschalten
+rule "Generische Regeln für IFTTT Licht aus"
+when Item LightOn_String received update
+then
+
+	var auswahl=LightOn_String.state.toString
+	var dimmer=100
+	logInfo("wohnzimmer.rules", "Licht an/dimmen im Raum "+auswahl)
+	
+	if(auswahl.contains(":")){
+		var split=auswahl.split(":")
+		//logInfo("wohnzimmer.rules","String Split: "+split.get(0)+" und "+split.get(1))
+		auswahl=split.get(0)
+		dimmer=Integer::parseInt(split.get(1))
+	}
+	
+	if(auswahl.contains("Küche")){
+		Kueche_Helligkeit.sendCommand(dimmer)
+	}
+	if(auswahl.contains("Wohnzimmer")){
+		Tisch_Helligkeit.sendCommand(dimmer)
+		Stehlampe_Helligkeit.sendCommand(dimmer)
+	}
+	if(auswahl.contains("Stehlampe")){
+		Stehlampe_Helligkeit.sendCommand(dimmer)
+	}
+	if(auswahl.contains("Tisch")){
+		Tisch_Helligkeit.sendCommand(dimmer)
+	}
+	if(auswahl.contains("Schlafzimmer")){
+		Schlafzimmer_Helligkeit.sendCommand(dimmer)
+	}
+	if(auswahl.contains("Erdgeschoss")){
+		Erdgeschloss_Switch.sendCommand(ON)
+	}
+end
+
+
+//Licht an aus überall
+rule "Erdgeschoss Switch Rule"
+when Item Erdgeschloss_Switch received update
+then
+if(Erdgeschloss_Switch.state==ON){
+    Tisch_Helligkeit.sendCommand(100)
+    Stehlampe_Helligkeit.sendCommand(100)
+    Kueche_Helligkeit.sendCommand(100)
+    //TODO PILIGHT SWITCHES
+    DeskLamp.sendCommand("on")
+}else{
+	//Thread::sleep(10000) // 10 Sekunden warten
+	Tisch_Helligkeit.sendCommand(0)
+	Stehlampe_Helligkeit.sendCommand(0)
+	Kueche_Helligkeit.sendCommand(0)
+	sendCommand(LgTvPower,ON)
+	//TODO PILIGHT SWITCHES
+	DeskLamp.sendCommand("off")
+}
+end
+
+//Fernsehr im Wohnzimmer
+rule "TV Switch Rule"
+when Item TV_Switch received update
+then
+if(TV_Switch.state==ON){
+	Remote_TV.sendCommand("KEY_POWER")
+    Tisch_Helligkeit.sendCommand(0)
+    Kueche_Helligkeit.sendCommand(0)
+	logInfo("wohnzimmer.rules", "Licht nur nach Sonnenuntergang anschalten - Es ist: "+now.getHourOfDay+" Sonnenuntergang um: "+sonnenuntergang)
+	if(now.getHourOfDay>sonnenuntergang){
+    	Stehlampe_Helligkeit.sendCommand(30)
+	}
+}else{
+	sendCommand(LgTvPower,ON)
+	if(now.getHourOfDay>sonnenuntergang){
+		Tisch_Helligkeit.sendCommand(80)
+		Stehlampe_Helligkeit.sendCommand(80)
+	}
+}
+end
+
+
+//Licht an aus im Wohnzimmer
+rule "Wohnzimmer Switch Rule"
+when Item Wohnzimmer_Switch received update
+then
+if(Wohnzimmer_Switch.state==ON){
+    Tisch_Helligkeit.sendCommand(80)
+    Stehlampe_Helligkeit.sendCommand(80)
+}else{
+	Tisch_Helligkeit.sendCommand(0)
+	Stehlampe_Helligkeit.sendCommand(0)
+}
+end
+
+//Gemütlich im Wohnzimmer
+rule "Wohnzimmer gemuetlich"
+when Item Gemuetlich_Switch received update
+then
+Tisch_Helligkeit.sendCommand(20)
+Stehlampe_Helligkeit.sendCommand(30)
+Kueche_Helligkeit.sendCommand(20)
+Tisch_Farbtemperatur.sendCommand(100)
+Stehlampe_Farbtemperatur.sendCommand(100)
+end
+
+//Putzen im Wohnzimmer
+rule "Wohnzimmer gemuetlich"
+when Item Putzen_Switch received update
+then
+Tisch_Helligkeit.sendCommand(100)
+Stehlampe_Helligkeit.sendCommand(100)
+Kueche_Helligkeit.sendCommand(100)
+Tisch_Farbtemperatur.sendCommand(0)
+Stehlampe_Farbtemperatur.sendCommand(0)
+end
+
+//Licht an aus in der Kueche
+rule "Kueche Switch Rule"
+when Item Kueche_Switch received update
+then
+if(Kueche_Switch.state==ON){
+    Kueche_Helligkeit.sendCommand(100)
+}else{
+	Kueche_Helligkeit.sendCommand(0)
+}
+end
+
+//Licht dimmen in der Kueche
+rule "Kueche Dimmer Rule"
+when Item Kueche_Dimmer received command
+then
+	val newState = Kueche_Dimmer.state
+	logInfo("wohnzimmer.rules", "Kueche_Dimmer zu "+newState)
+	sendCommand(Kueche_Helligkeit,newState.toString)
+	//TODO Lampe unter Hochschr. aus
+end
+
+//Licht dimmen im Wohnzimmer
+rule "Wohnzimmer Dimmer Rule"
+when Item Wohnzimmer_Dimmer received command
+then
+	val newState = Wohnzimmer_Dimmer.state
+	logInfo("wohnzimmer.rules", "Wonzimmer_Dimmer zu "+newState)
+	sendCommand(Tisch_Helligkeit,newState.toString)
+	sendCommand(Stehlampe_Helligkeit,newState.toString)
+end
+
+//Licht farbe im Wohnzimmer
+rule "Wohnzimmer Dimmer Farbe Rule"
+when Item Wohnzimmer_Farbe_Dimmer received command
+then
+	val newState = Wohnzimmer_Farbe_Dimmer.state
+	logInfo("wohnzimmer.rules", "Wonzimmer_Dimmer zu "+newState)
+	sendCommand(Tisch_Farbtemperatur,newState.toString)
+	sendCommand(Stehlampe_Farbtemperatur,newState.toString)
+end

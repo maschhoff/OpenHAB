@@ -1,0 +1,32 @@
+//Regel für Weihnachten - Fernsehr an mit Musik + Lichter an 
+
+rule "Play Chrismas_Switch Rule"
+when Item Chrismas_Switch received update
+then
+if(Chrismas_Switch.state==ON){
+    say("Frohe Weihnachten")
+    //CastLRWZ_URI.sendCommand("https://www.youtube.com/watch?v=E8gmARGvPlI&list=RDQM1l0ntwkE1RM")
+    Remote_TV.sendCommand("KEY_POWER")
+	//Wohnzimmer_Fernbedienung.sendCommand(PLAY)
+	DeskLamp.sendCommand("on")
+}else{
+    Wohnzimmer_Fernbedienung.sendCommand(PAUSE)
+	DeskLamp.sendCommand("off")
+	LgTvPower.sendCommand(on)
+}
+end
+
+
+// Zeitschaltungen
+
+rule "Zeitschaltung_Weihnachtsbeleuchtung_an" // Um 17:10 Uhr Lichter anmachen
+when Time cron "0 0/27 16 * * ?" // http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
+then
+DeskLamp.sendCommand("on")
+end
+
+rule "Zeitschaltung_Weihnachtsbeleuchtung_aus"
+when Time cron "0 0/29 22 * * ?" // http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
+then
+DeskLamp.sendCommand("off")
+end

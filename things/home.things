@@ -1,0 +1,11 @@
+//THINGS CONFIG
+
+//LIRC BRIDGE - Lirc Binding required
+Bridge lirc:bridge:local [ host="10.10.10.123", port="8765" ] {
+    Thing remote LGA [ remote="LGA" ]
+    Thing remote FAN [ remote="FAN" ]
+    Thing remote SAUGER [ remote="SAUGER" ]
+}
+
+//EXEC COMMANDS - EXEC Binding required
+Thing exec:command:pilight-desklamp [command="/openhab/conf/scripts/pilight.sh Switch1 %2$s", interval=0, autorun=true]

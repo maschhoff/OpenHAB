@@ -1,0 +1,15 @@
+
+//Testregel spielt 1Live im Wohnzimmer 
+rule "Play Switch Rule"
+when Item Play_Switch received update
+then
+if(Play_Switch.state==ON){
+    CastLRTV_URI.sendCommand(
+    "https://wdr-1live-diggi.sslcast.addradio.de/wdr/1live/diggi/mp3/128/stream.mp3")
+    Remote_TV.sendCommand(PLAY)
+}else{
+    Remote_TV.sendCommand(PAUSE)
+}
+end
+
+

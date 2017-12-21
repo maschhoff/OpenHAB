@@ -1,0 +1,56 @@
+//Regeln für die Alarmanlage
+
+var aktiv=false
+
+//Alarmanlage aktivieren
+rule "Aktiviere Alarmanalege Item Matze"
+when Item Matze_Away received update ON or 
+     Item Jessy_Away received update ON
+then
+logInfo("Alarmanlage.rules", "Jemand oder beide sind außerhaus: Matze: "+Matze_Away.state.toString+" Jessy: "+Jessy_Away.state.toString)
+if(Jessy_Away.state==ON and Matze_Away.state==ON ){
+    aktiv=true
+}
+end
+
+//Alarmanlage deaktivieren
+rule "Aktiviere Alarmanalege Item Matze"
+when Item Matze_Away received update OFF or 
+     Item Jessy_Away received update OFF
+then
+    logInfo("Alarmanlage.rules", "Jemand zuhause - Alarmanlage aus")
+    aktiv=false
+end
+
+//Beide weg und es wird dunkel - Lichtspiele beginnen
+rule "Zeitschaltung Lichtspiele an" // Um 17:10 Uhr Lichter anmachen
+when Time cron "0 0/10 17 * * ?" // http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
+then
+if(aktiv==true){
+    Gemuetlich_Switch.sendCommand(ON)
+    Kueche_Switch.sendCommand(ON)
+    Thread::sleep(2000000 )
+    Schlafzimmer_Helligkeit.sendCommand(100)
+    Thread::sleep(6000000 )
+    Schlafzimmer_Helligkeit.sendCommand(0)
+    Thread::sleep(4000000)
+    Kueche_Switch.sendCommand(OFF)
+    Thread::sleep(4000000)
+    Schlafzimmer_Helligkeit.sendCommand(100)
+    Thread::sleep(6000000)
+    TV_Switch.sendCommand(ON)
+    Thread::sleep(3000000)
+    TV_Switch.sendCommand(OFF)
+    Gemuetlich_Switch.sendCommand(ON)
+    Thread::sleep(3000000)
+    Schlafzimmer_Helligkeit.sendCommand(70)
+}
+end
+
+rule "Zeitschaltung Lichtspiele aus"
+when Time cron "0 0/29 22 * * ?" // http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
+then
+if(aktiv==true){
+    DeskLamp.sendCommand("off")
+}
+end

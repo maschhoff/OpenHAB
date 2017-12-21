@@ -1,0 +1,42 @@
+//ITEMS CONFIG
+
+//LIRC DEVICES
+String Remote_TV { channel="lirc:remote:local:LGA:transmit" }
+Switch LgTvPower {lgtv="ON:lgtv:POWER"}
+String Remote_FAN { channel="lirc:remote:local:FAN:transmit" }
+String Remote_SAUGER { channel="lirc:remote:local:SAUGER:transmit" }
+
+//CHROMECAST DEVICES - chromecast binding required
+String CastLRTV_URI { channel="chromecast:chromecast:cd54c8439aa543b87f2fa1db12d3b67e:playuri"}
+String CastLRWZ_URI { channel="chromecast:chromecast:e6514d4778d97e40db783e0ae575c511:playuri"}
+String CastLRBAD_URI { channel="chromecast:chromecast:62660b553e4d0ab2c8a2d30a91da787d:playuri"}
+
+//PILIGHT DEVICES
+String DeskLamp { channel="exec:command:pilight-desklamp:input"}
+
+//Alarmanlage
+Switch Matze_Away
+Switch Jessy_Away
+
+
+//MANUAL STRING FOR VOICE
+String LightOn_String
+String LightOff_String
+String Dimmer_String
+Number Dimmer_Number
+
+//MANUAL SWITCHES FOR RULES
+Switch Play_Switch
+Switch Chrismas_Switch
+Switch Wohnzimmer_Switch
+Switch Kueche_Switch
+Switch Erdgeschloss_Switch
+Switch TV_Switch
+Switch Gemuetlich_Switch
+Switch Putzen_Switch
+
+//MANUAL DIMMERS FOR RULES
+Dimmer Wohnzimmer_Dimmer
+Dimmer Wohnzimmer_Farbe_Dimmer
+Dimmer Kueche_Dimmer
+
