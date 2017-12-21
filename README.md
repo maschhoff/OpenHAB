@@ -8,13 +8,13 @@ Wichtig war, neben Angaben zum Container und Host Path (-v) den als Extraparamet
 
 
 Wichtige zu installierende Bindings für mein Setup: 
-*Chrome Binding 
-*Exec Bidning für pilight
-  *Damit das für pilight funktioniert muss zusätzlich noch curl in den docker installiert werden (docker ps danach docker exec    –it docker_id /bin/bash dann apt-get update und dann apt.get install curl 
-*LIRC Binding 
-*TRADFRI Binding 
-*LGTV Binding
-*Cloud Connector für myOpenHAB.org, um alles über IFTTT und Google Assistant steuern zu können
+* Chrome Binding 
+* Exec Bidning für pilight
+  * Damit das für pilight funktioniert muss zusätzlich noch curl in den docker installiert werden (docker ps danach docker exec    –it docker_id /bin/bash dann apt-get update und dann apt.get install curl 
+* LIRC Binding 
+* TRADFRI Binding 
+* LGTV Binding
+* Cloud Connector für myOpenHAB.org, um alles über IFTTT und Google Assistant steuern zu können
 
 
 Alle Things wurden dann über die PaperUI Oberfläche hinzugefügt und Konfiguriert.
