@@ -8,4 +8,13 @@ Bridge lirc:bridge:local [ host="10.10.10.123", port="8765" ] {
 }
 
 //EXEC COMMANDS - EXEC Binding required
-Thing exec:command:pilight-desklamp [command="/openhab/conf/scripts/pilight.sh Switch1 %2$s", interval=0, autorun=true]
+
+//PILIGHT
+Thing exec:command:pilight-switch1 [command="/openhab/conf/scripts/pilight.sh Switch1 %2$s", interval=0, autorun=true]
+Thing exec:command:pilight-switch2 [command="/openhab/conf/scripts/pilight.sh Switch2 %2$s", interval=0, autorun=true]
+Thing exec:command:pilight-switch3 [command="/openhab/conf/scripts/pilight.sh Switch3 %2$s", interval=0, autorun=true]
+Thing exec:command:pilight-switch4 [command="/openhab/conf/scripts/pilight.sh Switch4 %2$s", interval=0, autorun=true]
+
+//HeizungsServer
+Thing exec:command:cometblue-wz-1 [command="/openhab/conf/scripts/cometblue.sh FB:19:25:9F:3D:BA %2$s", interval=0, autorun=true]
+Thing exec:command:cometblue-wz-2 [command="/openhab/conf/scripts/cometblue.sh BC:26:4E:C5:06:B8 %2$s", interval=0, autorun=true]

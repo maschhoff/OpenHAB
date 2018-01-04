@@ -1,8 +1,19 @@
 val sonnenuntergang=17
 val sonnenaufgang=9
 
+//Licht in Kueche und KuechenLeiste anstellen
+rule "Licht Kueche dann KuechenLeiste"
+when Item Kueche_Helligkeit received update
+then
+	if(Kueche_Helligkeit.state>0){
+		KuechenLeiste.sendCommand("on")
+	}else{
+		KuechenLeiste.sendCommand("off")
+	}
+end
+
 //Generische Regeln für IFTTT / Google Assistant Phrase mit variablen zum Licht ausschalten
-rule "Generische Regeln für IFTTT Licht an"
+rule "Generische Regeln für IFTTT Licht aus"
 when Item LightOff_String received update
 then
 
@@ -10,6 +21,7 @@ then
 	logInfo("wohnzimmer.rules", "Licht aus im Raum "+auswahl)
 	if(auswahl.contains("Küche")){
 		Kueche_Helligkeit.sendCommand(0)
+		KuechenLeiste.sendCommand("off")
 	}
 	if(auswahl.contains("Wohnzimmer")){
 		Tisch_Helligkeit.sendCommand(0)
@@ -29,7 +41,7 @@ then
 end
 
 //Generische Regeln für IFTTT / Google Assistant Phrase mit variablen zum Licht ausschalten
-rule "Generische Regeln für IFTTT Licht aus"
+rule "Generische Regeln für IFTTT Licht an"
 when Item LightOn_String received update
 then
 
@@ -46,6 +58,11 @@ then
 	
 	if(auswahl.contains("Küche")){
 		Kueche_Helligkeit.sendCommand(dimmer)
+		if(dimmer<40){
+			KuechenLeiste.sendCommand("off")
+		}else{
+			KuechenLeiste.sendCommand("on")
+		}
 	}
 	if(auswahl.contains("Wohnzimmer")){
 		Tisch_Helligkeit.sendCommand(dimmer)
@@ -74,16 +91,22 @@ if(Erdgeschloss_Switch.state==ON){
     Tisch_Helligkeit.sendCommand(100)
     Stehlampe_Helligkeit.sendCommand(100)
     Kueche_Helligkeit.sendCommand(100)
-    //TODO PILIGHT SWITCHES
+    // PILIGHT SWITCHES
     DeskLamp.sendCommand("on")
+	KuechenLeiste.sendCommand("on")
+	Switch2.sendCommand("on")
+	Switch3.sendCommand("on")
 }else{
 	//Thread::sleep(10000) // 10 Sekunden warten
 	Tisch_Helligkeit.sendCommand(0)
 	Stehlampe_Helligkeit.sendCommand(0)
 	Kueche_Helligkeit.sendCommand(0)
 	sendCommand(LgTvPower,ON)
-	//TODO PILIGHT SWITCHES
+	// PILIGHT SWITCHES
 	DeskLamp.sendCommand("off")
+	KuechenLeiste.sendCommand("off")
+	Switch2.sendCommand("off")
+	Switch3.sendCommand("off")
 }
 end
 
@@ -95,6 +118,7 @@ if(TV_Switch.state==ON){
 	Remote_TV.sendCommand("KEY_POWER")
     Tisch_Helligkeit.sendCommand(0)
     Kueche_Helligkeit.sendCommand(0)
+	KuechenLeiste.sendCommand("off")
 	logInfo("wohnzimmer.rules", "Licht nur nach Sonnenuntergang anschalten - Es ist: "+now.getHourOfDay+" Sonnenuntergang um: "+sonnenuntergang)
 	if(now.getHourOfDay>sonnenuntergang){
     	Stehlampe_Helligkeit.sendCommand(30)
@@ -150,8 +174,10 @@ when Item Kueche_Switch received update
 then
 if(Kueche_Switch.state==ON){
     Kueche_Helligkeit.sendCommand(100)
+	KuechenLeiste.sendCommand("on")
 }else{
 	Kueche_Helligkeit.sendCommand(0)
+	KuechenLeiste.sendCommand("off")
 }
 end
 
@@ -162,7 +188,7 @@ then
 	val newState = Kueche_Dimmer.state
 	logInfo("wohnzimmer.rules", "Kueche_Dimmer zu "+newState)
 	sendCommand(Kueche_Helligkeit,newState.toString)
-	//TODO Lampe unter Hochschr. aus
+	KuchenLeiste.sendCommand("off")
 end
 
 //Licht dimmen im Wohnzimmer

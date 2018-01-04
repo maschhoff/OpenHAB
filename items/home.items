@@ -12,12 +12,28 @@ String CastLRWZ_URI { channel="chromecast:chromecast:e6514d4778d97e40db783e0ae57
 String CastLRBAD_URI { channel="chromecast:chromecast:62660b553e4d0ab2c8a2d30a91da787d:playuri"}
 
 //PILIGHT DEVICES
-String DeskLamp { channel="exec:command:pilight-desklamp:input"}
+//SWITCHES
+String Switch1 { channel="exec:command:pilight-switch1:input"}  // Alter Switch 
+String KuechenLeiste { channel="exec:command:pilight-switch4:input"}
+String DeskLamp { channel="exec:command:pilight-switch2:input"} // aktuell Weihnachtslicht
+String Switch3 { channel="exec:command:pilight-switch3:input"} // aktuell Weihnachtsbaum
+
+//TEMPERATUR
+String Temp1_String
+String Temp2_String
+String Temp1_String_Humidity
+String Temp2_String_Humidity
+
+//HEIZUNG
+//Thermostate
+String Heizung_WZ_1 { channel="exec:command:cometblue-wz-1:input"}
+String Heizung_WZ_2 { channel="exec:command:cometblue-wz-2:input"}
+//RULE GROUPS
+Dimmer Heizung_WZ
 
 //Alarmanlage
 Switch Matze_Away
 Switch Jessy_Away
-
 
 //MANUAL STRING FOR VOICE
 String LightOn_String
