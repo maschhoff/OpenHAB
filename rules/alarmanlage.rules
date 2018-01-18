@@ -2,25 +2,74 @@
 
 var aktiv=false
 
+//Alarmanlage manuel aktivieren oder deaktivieren
+rule "Manuelle Aktivierung der Alarmanlage"
+when Item Alarmanlage_Switch received command
+then
+    if(Alarmanlage_Switch.state==ON){
+        aktiv=true
+    }else{
+        aktiv=false
+        Alarmanlage_ausloesen_Switch.sendCommand("OFF")
+    }
+end
+
 //Alarmanlage aktivieren
 rule "Aktiviere Alarmanalege Item Matze"
 when Item Matze_Away received update ON or 
      Item Jessy_Away received update ON
 then
 logInfo("Alarmanlage.rules", "Jemand oder beide sind außerhaus: Matze: "+Matze_Away.state.toString+" Jessy: "+Jessy_Away.state.toString)
-if(Jessy_Away.state==ON and Matze_Away.state==ON ){
+if(Jessy_Away.state==ON && Matze_Away.state==ON){
     aktiv=true
+    Alarmanlage_Switch.sendCommand("ON")
 }
 end
 
 //Alarmanlage deaktivieren
-rule "Aktiviere Alarmanalege Item Matze"
+rule "Deaktiviere Alarmanalege Item Matze"
 when Item Matze_Away received update OFF or 
      Item Jessy_Away received update OFF
 then
     logInfo("Alarmanlage.rules", "Jemand zuhause - Alarmanlage aus")
     aktiv=false
+    Alarmanlage_Switch.sendCommand("OFF")  
 end
+
+//Fensterkontakte
+rule "Fenster in der Kueche auf oder zu"
+when Item Kuechenfenster received command
+then
+    logInfo("Alarmanlage.rules","Kuechenfenster "+Kuechenfenster.state.toString)
+    if(Kuechenfenster.state.equals("opened")){
+        Kuechenfenster_Switch.sendCommand("ON")  
+        if(aktiv==true){
+            //Alarmanlage aktivieren
+            Alarmanlage_ausloesen_Switch.sendCommand("ON")
+        }
+    }else{
+        Kuechenfenster_Switch.sendCommand("OFF")
+    }
+end
+
+//Alarmanlage auslösen
+rule "Alarmanlage auslösen"
+when Item Alarmanlage_ausloesen_Switch received update
+then
+    if(Alarmanlage_ausloesen_Switch.state==ON){
+          logInfo("Alarmanlage.rule", "Alarmanlage wird ausgelöst!")
+         //Lampen an Ton an!
+        Erdgeschloss_Switch.sendCommand("ON")
+        CastLRTV_URI.sendCommand("http://10.10.10.2:81/sirene.mp3")
+	    Fernseher_Fernbedienung.sendCommand(PLAY)
+        sendNotification("aschhoff@cmais.de", "!!! EINBRUCH !!!")
+        sendNotification("jezzy1983@gmail.com", "!!! EINBRUCH !!!")
+    }else{
+        Erdgeschloss_Switch.sendCommand("OFF") 
+        Fernseher_Fernbedienung.sendCommand(STOP)
+    }
+end
+
 
 //Beide weg und es wird dunkel - Lichtspiele beginnen
 rule "Zeitschaltung Lichtspiele an" // Um 17:10 Uhr Lichter anmachen
@@ -52,5 +101,7 @@ when Time cron "0 0/29 22 * * ?" // http://www.quartz-scheduler.org/documentatio
 then
 if(aktiv==true){
     DeskLamp.sendCommand("off")
+    Schlafzimmer_Helligkeit.sendCommand(0)
+    Kueche_Switch.sendCommand(0)
 }
 end

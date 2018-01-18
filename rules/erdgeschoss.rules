@@ -94,7 +94,6 @@ if(Erdgeschloss_Switch.state==ON){
     // PILIGHT SWITCHES
     DeskLamp.sendCommand("on")
 	KuechenLeiste.sendCommand("on")
-	Switch2.sendCommand("on")
 	Switch3.sendCommand("on")
 }else{
 	//Thread::sleep(10000) // 10 Sekunden warten
@@ -105,8 +104,8 @@ if(Erdgeschloss_Switch.state==ON){
 	// PILIGHT SWITCHES
 	DeskLamp.sendCommand("off")
 	KuechenLeiste.sendCommand("off")
-	Switch2.sendCommand("off")
 	Switch3.sendCommand("off")
+	Heizung_WZ.sendCommand("17")
 }
 end
 

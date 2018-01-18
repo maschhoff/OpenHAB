@@ -24,14 +24,24 @@ String Temp2_String
 String Temp1_String_Humidity
 String Temp2_String_Humidity
 
+//FENSTER
+String Kuechenfenster
+Switch Kuechenfenster_Switch
+
 //HEIZUNG
+
 //Thermostate
 String Heizung_WZ_1 { channel="exec:command:cometblue-wz-1:input"}
 String Heizung_WZ_2 { channel="exec:command:cometblue-wz-2:input"}
+String Heizung_Bad_String { channel="exec:command:cometblue-bad:input"}
+
 //RULE GROUPS
 Dimmer Heizung_WZ
+Dimmer Heizung_Bad_Dimmer
 
 //Alarmanlage
+Switch Alarmanlage_Switch
+Switch Alarmanlage_ausloesen_Switch
 Switch Matze_Away
 Switch Jessy_Away
 
