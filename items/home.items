@@ -18,6 +18,8 @@ String KuechenLeiste { channel="exec:command:pilight-switch4:input"}
 String DeskLamp { channel="exec:command:pilight-switch2:input"} // aktuell Weihnachtslicht
 String Switch3 { channel="exec:command:pilight-switch3:input"} // aktuell Weihnachtsbaum
 
+//TEMPERATUR, FENSTER, WETTER, HEIZUNG
+
 //TEMPERATUR
 String Temp1_String
 String Temp2_String
@@ -26,18 +28,27 @@ String Temp2_String_Humidity
 
 //FENSTER
 String Kuechenfenster
-Switch Kuechenfenster_Switch
+String Wohnzimmerfenster_links
+String Kellertuer
+String Wintergartenfenster
+String Schlafzimmerfenster
+
+//WETTER
+String Wetter_Info_Command { channel="exec:command:wetter:input"}
+Number Sunrise_Number
+Number Sunset_Number
+String Temp_Outside_String
+String Humidity_Outside_String
 
 //HEIZUNG
 
 //Thermostate
 String Heizung_WZ_1 { channel="exec:command:cometblue-wz-1:input"}
 String Heizung_WZ_2 { channel="exec:command:cometblue-wz-2:input"}
-String Heizung_Bad_String { channel="exec:command:cometblue-bad:input"}
+String Heizung_Kueche { channel="exec:command:cometblue-bad:input"}
 
 //RULE GROUPS
 Dimmer Heizung_WZ
-Dimmer Heizung_Bad_Dimmer
 
 //Alarmanlage
 Switch Alarmanlage_Switch

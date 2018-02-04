@@ -8,9 +8,11 @@ when Item Alarmanlage_Switch received command
 then
     if(Alarmanlage_Switch.state==ON){
         aktiv=true
+		pushover("Alarmanlage - AKTIVIERT",0)
     }else{
         aktiv=false
         Alarmanlage_ausloesen_Switch.sendCommand("OFF")
+		pushover("Alarmanlage - DEAKTIVIERT",0)
     }
 end
 
@@ -23,32 +25,33 @@ logInfo("Alarmanlage.rules", "Jemand oder beide sind außerhaus: Matze: "+Matze_
 if(Jessy_Away.state==ON && Matze_Away.state==ON){
     aktiv=true
     Alarmanlage_Switch.sendCommand("ON")
+	Erdgeschloss_Switch.sendCommand("OFF")
 }
 end
 
 //Alarmanlage deaktivieren
-rule "Deaktiviere Alarmanalege Item Matze"
-when Item Matze_Away received update OFF or 
-     Item Jessy_Away received update OFF
-then
-    logInfo("Alarmanlage.rules", "Jemand zuhause - Alarmanlage aus")
-    aktiv=false
-    Alarmanlage_Switch.sendCommand("OFF")  
-end
+//rule "Deaktiviere Alarmanalege Item Matze"
+//when Item Matze_Away received update OFF or 
+//     Item Jessy_Away received update OFF or
+//	 Item Alarmanlage_Switch received command OFF
+//then
+//    logInfo("Alarmanlage.rules", "Jemand zuhause - Alarmanlage aus")
+//    aktiv=false
+//    Alarmanlage_Switch.sendCommand("OFF")
+//end
 
 //Fensterkontakte
-rule "Fenster in der Kueche auf oder zu"
-when Item Kuechenfenster received command
-then
-    logInfo("Alarmanlage.rules","Kuechenfenster "+Kuechenfenster.state.toString)
-    if(Kuechenfenster.state.equals("opened")){
-        Kuechenfenster_Switch.sendCommand("ON")  
-        if(aktiv==true){
-            //Alarmanlage aktivieren
-            Alarmanlage_ausloesen_Switch.sendCommand("ON")
-        }
-    }else{
-        Kuechenfenster_Switch.sendCommand("OFF")
+rule "Fenster auf oder zu"
+when Item Kuechenfenster received command opened or
+    Item Wohnzimmerfenster_links received command opened or
+    Item Kellertuer received command opened or
+    Item Wintergartenfenster received command opened or
+    Item Schlafzimmerfenster received command opened
+then 
+    logInfo("Alarmanlage.rules", "Fenster wurde geöffnet")
+    if(aktiv==true){
+       //Alarmanlage aktivieren
+        Alarmanlage_ausloesen_Switch.sendCommand("ON")
     }
 end
 
@@ -59,14 +62,21 @@ then
     if(Alarmanlage_ausloesen_Switch.state==ON){
           logInfo("Alarmanlage.rule", "Alarmanlage wird ausgelöst!")
          //Lampen an Ton an!
-        Erdgeschloss_Switch.sendCommand("ON")
+        
         CastLRTV_URI.sendCommand("http://10.10.10.2:81/sirene.mp3")
+        CastLRBAD_URI.sendCommand("http://10.10.10.2:81/sirene.mp3")
+        Fernseher_LautstRke.sendCommand(10)
 	    Fernseher_Fernbedienung.sendCommand(PLAY)
-        sendNotification("aschhoff@cmais.de", "!!! EINBRUCH !!!")
-        sendNotification("jezzy1983@gmail.com", "!!! EINBRUCH !!!")
+        Badezimmer_Fernbedienung.sendCommand(PLAY)
+        Thread::sleep(7000)
+        Erdgeschloss_Switch.sendCommand("ON")
+        //sendNotification("aschhoff@cmais.de", "!!! EINBRUCH !!!")
+        //sendNotification("jezzy1983@gmail.com", "!!! EINBRUCH !!!")
+		pushover("Alarmanlage - EINBRUCH",2,null,null,"persistent")
     }else{
-        Erdgeschloss_Switch.sendCommand("OFF") 
         Fernseher_Fernbedienung.sendCommand(STOP)
+        Badezimmer_Fernbedienung.sendCommand(STOP)
+        Fernseher_LautstRke.sendCommand(20)
     }
 end
 
@@ -78,9 +88,9 @@ then
 if(aktiv==true){
     Gemuetlich_Switch.sendCommand(ON)
     Kueche_Switch.sendCommand(ON)
-    Thread::sleep(2000000 )
+    Thread::sleep(2000000)
     Schlafzimmer_Helligkeit.sendCommand(100)
-    Thread::sleep(6000000 )
+    Thread::sleep(6000000)
     Schlafzimmer_Helligkeit.sendCommand(0)
     Thread::sleep(4000000)
     Kueche_Switch.sendCommand(OFF)

@@ -6,6 +6,7 @@ then
 	logInfo("heizung.rules", "Heizung_WZ zu "+newState)
 	sendCommand(Heizung_WZ_1,newState.toString)
 	sendCommand(Heizung_WZ_2,newState.toString)
+	sendCommand(Heizung_Kueche,newState.toString)
 end
 
 rule "Temperaturueberwachung Wohnzimmer"
@@ -19,16 +20,10 @@ then
 	}
 	val temp1_int = Integer::parseInt(Temp1_String.state.toString)
 
-	if(temp1_int<heizunHeizung_Badg_int){
+	if(temp1_int<heizung_int){
 		
 		sendCommand(Heizung_WZ_1,Heizung_WZ.toString)
 		sendCommand(Heizung_WZ_2,Heizung_WZ.toString)
+		sendCommand(Heizung_Kueche,Heizung_WZ.toString)
 	}
-end
-
-rule "Temperatur Bad"
-when Item Heizung_Bad_String received command
-then
-	Thread::sleep(2700000)
-	sendCommand(Heizung_Bad_String,"18")
 end

@@ -1,5 +1,4 @@
-val sonnenuntergang=17
-val sonnenaufgang=9
+
 
 //Licht in Kueche und KuechenLeiste anstellen
 rule "Licht Kueche dann KuechenLeiste"
@@ -95,17 +94,18 @@ if(Erdgeschloss_Switch.state==ON){
     DeskLamp.sendCommand("on")
 	KuechenLeiste.sendCommand("on")
 	Switch3.sendCommand("on")
+	Heizung_WZ.sendCommand("21")
 }else{
 	//Thread::sleep(10000) // 10 Sekunden warten
 	Tisch_Helligkeit.sendCommand(0)
 	Stehlampe_Helligkeit.sendCommand(0)
 	Kueche_Helligkeit.sendCommand(0)
-	sendCommand(LgTvPower,ON)
 	// PILIGHT SWITCHES
-	DeskLamp.sendCommand("off")
 	KuechenLeiste.sendCommand("off")
+	DeskLamp.sendCommand("off")
 	Switch3.sendCommand("off")
 	Heizung_WZ.sendCommand("17")
+	sendCommand(LgTvPower,ON)
 }
 end
 
@@ -118,13 +118,13 @@ if(TV_Switch.state==ON){
     Tisch_Helligkeit.sendCommand(0)
     Kueche_Helligkeit.sendCommand(0)
 	KuechenLeiste.sendCommand("off")
-	logInfo("wohnzimmer.rules", "Licht nur nach Sonnenuntergang anschalten - Es ist: "+now.getHourOfDay+" Sonnenuntergang um: "+sonnenuntergang)
-	if(now.getHourOfDay>sonnenuntergang){
+	logInfo("wohnzimmer.rules", "Licht nur nach Sonnenuntergang anschalten - Es ist: "+now.getHourOfDay+" Sonnenuntergang um: "+Integer::parseInt(Sunset_Number.state.toString))
+	if(now.getHourOfDay>Integer::parseInt(Sunset_Number.state.toString)){
     	Stehlampe_Helligkeit.sendCommand(30)
 	}
 }else{
 	sendCommand(LgTvPower,ON)
-	if(now.getHourOfDay>sonnenuntergang){
+	if(now.getHourOfDay>Integer::parseInt(Sunset_Number.state.toString)){
 		Tisch_Helligkeit.sendCommand(80)
 		Stehlampe_Helligkeit.sendCommand(80)
 	}
@@ -187,7 +187,7 @@ then
 	val newState = Kueche_Dimmer.state
 	logInfo("wohnzimmer.rules", "Kueche_Dimmer zu "+newState)
 	sendCommand(Kueche_Helligkeit,newState.toString)
-	KuchenLeiste.sendCommand("off")
+	KuechenLeiste.sendCommand("off")
 end
 
 //Licht dimmen im Wohnzimmer

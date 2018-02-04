@@ -1,3 +1,3 @@
 #!/bin/bash
 #send command to HeizungServer / cometblue
-curl "http://10.10.10.123:3247/"$1"/"$2
+wget -qO- "http://10.10.10.123:3247/"$1"/"$2 >> ./logs/exec.log

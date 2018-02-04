@@ -1,15 +1,12 @@
-
-//Testregel spielt 1Live im Wohnzimmer 
-rule "Play Switch Rule"
-when Item Play_Switch received update
+//Init
+rule "Initial rule on startup"
+when
+    System started
 then
-if(Play_Switch.state==ON){
-    CastLRTV_URI.sendCommand(
-    "https://wdr-1live-diggi.sslcast.addradio.de/wdr/1live/diggi/mp3/128/stream.mp3")
-    Remote_TV.sendCommand(PLAY)
-}else{
-    Remote_TV.sendCommand(PAUSE)
-}
+    logInfo("home.rules","Initial Rule started")
+    Heizung_WZ.sendCommand(17)
+    Wetter_Info_Command.sendCommand("on")
 end
+
 
 
