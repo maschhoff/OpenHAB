@@ -1,9 +1,4 @@
-Your scripts go here.
-All script files have to have the ".script" file extension and must follow a special syntax.
-
-Check out the openHAB documentation for more details:
-http://docs.openhab.org/features/automation/ruledsl.html#scripts
-
+Folder for ".script" files 
 I put although my sh exec scripts for the exec binding into this folder.
 If you are running everything on the same device you can just call the command.
 I am using a Server and a RasperryPi so I have to send everything within my local network.
