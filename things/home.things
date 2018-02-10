@@ -21,4 +21,4 @@ Thing exec:command:cometblue-wz-2 [command="/openhab/conf/scripts/cometblue.sh B
 Thing exec:command:cometblue-bad [command="/openhab/conf/scripts/cometblue.sh 85:99:F7:EF:71:D2 %2$s", interval=0, autorun=true]
 
 //Wetter
-Thing exec:command:wetter [command="/openhab/conf/scripts/wetter.sh", interval=0, autorun=true]
+Thing exec:command:wetter [command="/openhab/conf/scripts/wetter.sh", interval=60, autorun=true]

@@ -27,11 +27,11 @@ String Temp1_String_Humidity
 String Temp2_String_Humidity
 
 //FENSTER
-String Kuechenfenster
-String Wohnzimmerfenster_links
-String Kellertuer
-String Wintergartenfenster
-String Schlafzimmerfenster
+String Kuechenfenster "[MAP(de.map):%s]"
+String Wohnzimmerfenster_links "[MAP(de.map):%s]"
+String Kellertuer "[MAP(de.map):%s]"
+String Wintergartenfenster "[MAP(de.map):%s]"
+String Schlafzimmerfenster "[MAP(de.map):%s]"
 
 //WETTER
 String Wetter_Info_Command { channel="exec:command:wetter:input"}
@@ -53,6 +53,7 @@ Dimmer Heizung_WZ
 //Alarmanlage
 Switch Alarmanlage_Switch
 Switch Alarmanlage_ausloesen_Switch
+Switch Presence_Simulation_Switch
 Switch Matze_Away
 Switch Jessy_Away
 

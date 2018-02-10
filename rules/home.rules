@@ -5,8 +5,14 @@ when
 then
     logInfo("home.rules","Initial Rule started")
     Heizung_WZ.sendCommand(17)
-    Wetter_Info_Command.sendCommand("on")
+    Wintergartenfenster.sendCommand("closed")
+    Schlafzimmerfenster.sendCommand("closed")
+    Wohnzimmerfenster_links.sendCommand("closed")
+    Kellertuer.sendCommand("closed")
+    Kuechenfenster.sendCommand("closed")
+    Temp1_String.sendCommand("20")
+    Temp2_String.sendCommand("20")
+    Temp1_String_Humidity.sendCommand("50")
+    Wetter_Info_Command.sendCommand("ON")
+    Alarmanlage_Switch.sendCommand("OFF")
 end
-
-
-
