@@ -24,7 +24,7 @@ rule "Aktiviere Alarmanalege Item Matze"
 when Item Matze_Away received update ON or 
      Item Jessy_Away received update ON
 then
-//logInfo("Alarmanlage.rules", "Jemand oder beide sind außerhaus: Matze: "+Matze_Away.state.toString+" Jessy: "+Jessy_Away.state.toString)
+logInfo("Alarmanlage.rules", "Jemand oder beide sind außerhaus: Matze: "+Matze_Away.state.toString+" Jessy: "+Jessy_Away.state.toString)
 if(Jessy_Away.state==ON && Matze_Away.state==ON){
     aktiv=true
     Alarmanlage_Switch.sendCommand("ON")
@@ -33,16 +33,25 @@ if(Jessy_Away.state==ON && Matze_Away.state==ON){
 end
 
 //Alarmanlage deaktivieren
-rule "Deaktiviere Alarmanalege Item Matze"
-// Item Matze_Away received update OFF or 
-//     Item Jessy_Away received update OFF or
+rule "Deaktiviere Alarmanalege Item Matze Jessy Away"
 when
-	 Item Alarmanlage_Switch received command OFF
+    Item Matze_Away received update OFF or 
+    Item Jessy_Away received update OFF
 then
-    logInfo("Alarmanlage.rules", "Jemand oder beide sind zuhause: Matze: "+Matze_Away.state.toString+" Jessy: "+Jessy_Away.state.toString+" Manuell: "+Alarmanlage_Switch.state.toString)
+    logInfo("Alarmanlage.rules", "Jemand oder beide sind zuhause: Matze: "+Matze_Away.state.toString+" Jessy: "+Jessy_Away.state.toString)
     aktiv=false
     Alarmanlage_Switch.sendCommand("OFF")
 end
+
+//Alarmanlage deaktivieren manuell
+rule "Deaktiviere Alarmanalege Item Alarmanlage_Switch"
+when
+	 Item Alarmanlage_Switch received command OFF
+then
+    logInfo("Alarmanlage.rules", "Alarmanlage manuell deaktiviert")
+    aktiv=false
+end
+
 
 //Fensterkontakte
 rule "Fenster auf oder zu"
