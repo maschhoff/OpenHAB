@@ -2,21 +2,31 @@
 
 var aktiv=false
 
-//Alarmanlage manuel aktivieren oder deaktivieren
+//Alarmanlage manuel aktivieren
 rule "Manuelle Aktivierung der Alarmanlage"
-when Item Alarmanlage_Switch received command
+when Item Alarmanlage_Switch received command ON
 then
-    if(Alarmanlage_Switch.state==ON){
         aktiv=true
         logInfo("Alarmanlage.rules", "Alarmanlage aktiv!")
-		pushover("Alarmanlage - AKTIVIERT",0)
-		if(now.getHourOfDay>Integer::parseInt(Sunset_Number.state.toString)){
+		//pushover("Alarmanlage - AKTIVIERT",0)
+		sendPushoverMessage(pushoverBuilder("Alarmanlage - AKTIVIERT"))
+        SoundOfText.sendCommand("Alarmanlage%20wurde%20aktiviert")
+        
+        //Lichtspiele beginnen wenn man im dunklen das Haus verlässt vor 22 uhr
+        logInfo("Alarmanlage.rules", "Sonnenuntergang: "+Integer::parseInt(Sunset_Number.state.toString))
+		if(now.getHourOfDay>Integer::parseInt(Sunset_Number.state.toString) && now.getHourOfDay<22){ 
 			Presence_Simulation_Switch.sendCommand("ON")
 		}
-    }else{
+end
+
+//Alarmanlage manuel deaktivieren
+rule "Manuelle Aktivierung der Alarmanlage"
+when Item Alarmanlage_Switch received command OFF
+then
+        logInfo("Alarmanlage.rules", "Alarmanlage manuell deaktiviert")
+        SoundOfText.sendCommand("Alarmanlage%20wurde%20deaktiviert")
         aktiv=false
         Alarmanlage_ausloesen_Switch.sendCommand("OFF")
-    }
 end
 
 //Alarmanlage aktivieren
@@ -39,26 +49,23 @@ when
     Item Jessy_Away received update OFF
 then
     logInfo("Alarmanlage.rules", "Jemand oder beide sind zuhause: Matze: "+Matze_Away.state.toString+" Jessy: "+Jessy_Away.state.toString)
+    //pushover("Alarmanlage - DEAKTIVIERT",0)
+    sendPushoverMessage(pushoverBuilder("Alarmanlage - DEAKTIVIERT"))
     aktiv=false
     Alarmanlage_Switch.sendCommand("OFF")
 end
 
-//Alarmanlage deaktivieren manuell
-rule "Deaktiviere Alarmanalege Item Alarmanlage_Switch"
-when
-	 Item Alarmanlage_Switch received command OFF
-then
-    logInfo("Alarmanlage.rules", "Alarmanlage manuell deaktiviert")
-    aktiv=false
-end
+
 
 
 //Fensterkontakte
 rule "Fenster auf oder zu"
 when Item Kuechenfenster received command opened or
     Item Wohnzimmerfenster_links received command opened or
+    Item Wohnzimmerfenster_rechts received command opened or
     Item Kellertuer received command opened or
     Item Wintergartenfenster received command opened or
+	Item Badezimmerfenster received command opened or
     Item Schlafzimmerfenster received command opened
 then 
     logInfo("Alarmanlage.rules", "Fenster wurde geöffnet")
@@ -76,65 +83,102 @@ then
           logInfo("Alarmanlage.rule", "Alarmanlage wird ausgelöst!")
          //Lampen an Ton an!
         
-        CastLRTV_URI.sendCommand("http://10.10.10.2:81/sirene.mp3")
-        CastLRBAD_URI.sendCommand("http://10.10.10.2:81/sirene.mp3")
-        Fernseher_LautstRke.sendCommand(10)
+        CastLRTV_URI.sendCommand("http://192.168.0.81/sirene.mp3")
+        CastLRBAD_URI.sendCommand("http://192.168.0.81/sirene.mp3")
+		CastLRWZ_URI.sendCommand("http://192.168.0.81/sirene.mp3")
+        Fernseher_LautstRke.sendCommand(100) 
+        Badezimmer_LautstRke.sendCommand(100)
+		Wohnzimmer_LautstRke.sendCommand(100)
 	    Fernseher_Fernbedienung.sendCommand(PLAY)
         Badezimmer_Fernbedienung.sendCommand(PLAY)
+		Wohnzimmer_Fernbedienung.sendCommand(PLAY)
+        SoundOfText.sendCommand("Einbruch%20entdeckt,%20Alarmanlage%20wird%20ausgelöst")
         Thread::sleep(7000)
         Erdgeschloss_Switch.sendCommand("ON")
-        //sendNotification("aschhoff@cmais.de", "!!! EINBRUCH !!!")
-        //sendNotification("jezzy1983@gmail.com", "!!! EINBRUCH !!!")
-		pushover("Alarmanlage - EINBRUCH",2,null,null,"persistent")
+        Kinderzimmer_Helligkeit.sendCommand(100)
+		//pushover("Alarmanlage - EINBRUCH",2,null,null,"persistent")
+		sendPushoverMessage(pushoverBuilder("Alarmanlage - EINBRUCH").withEmergencyPriority())
+        Thread::sleep(60000)
+        Alarmanlage_ausloesen_Switch.sendCommand(OFF)
     }else{
         Fernseher_Fernbedienung.sendCommand(STOP)
         Badezimmer_Fernbedienung.sendCommand(STOP)
-        Fernseher_LautstRke.sendCommand(20)
+		Wohnzimmer_Fernbedienung.sendCommand(STOP)
+        Fernseher_LautstRke.sendCommand(0)
+        Badezimmer_LautstRke.sendCommand(0)
+		Wohnzimmer_LautstRke.sendCommand(0)
     }
 end
 
 //Lichtspiele beginnen
 rule "Zeitschaltung Lichtspiele an" // Um 17:10 Uhr Lichter anmachen
-when Item Presence_Simulation_Switch received update ON
+when Item Presence_Simulation_Switch received command ON
 then
-if(aktiv==true){
-  Gemuetlich_Switch.sendCommand(ON)
+if(aktiv){
+    logInfo("Alarmanlage.rules", "Presence simulation wird aktiv!")
+    Fernseher_LautstRke.sendCommand(0)
+    Badezimmer_LautstRke.sendCommand(0)
+	Wohnzimmer_LautstRke.sendCommand(0)
+    Thread::sleep(300000)
+    sendCommand(DeskLamp, "on")
+    Gemuetlich_Switch.sendCommand(ON)
     Kueche_Switch.sendCommand(ON)
     Thread::sleep(2000000)
     Schlafzimmer_Helligkeit.sendCommand(100)
+	sendCommand(DeskLamp, "off")
     Thread::sleep(6000000)
+	sendCommand(DeskLamp, "on")
     Schlafzimmer_Helligkeit.sendCommand(0)
+    Kinderzimmer_Helligkeit.sendCommand(100)
     Thread::sleep(4000000)
     Kueche_Switch.sendCommand(OFF)
+	sendCommand(Switch3, "on")
     Thread::sleep(4000000)
+	sendCommand(Switch3, "off")
     Schlafzimmer_Helligkeit.sendCommand(100)
+    Kinderzimmer_Helligkeit.sendCommand(0)
     Thread::sleep(6000000)
-    TV_Switch.sendCommand(ON)
+	sendCommand(Switch3, "on")
     Thread::sleep(3000000)
-    TV_Switch.sendCommand(OFF)
+    Kinderzimmer_Helligkeit.sendCommand(100)
     Gemuetlich_Switch.sendCommand(ON)
     Thread::sleep(3000000)
+	sendCommand(Switch3, "off")
     Schlafzimmer_Helligkeit.sendCommand(70)
+	Thread::sleep(3000000)
+	Erdgeschloss_Switch.sendCommand(OFF)
+	sendCommand(DeskLamp, "off")
+	Kinderzimmer_Helligkeit.sendCommand(0)
+	Schlafzimmer_Helligkeit.sendCommand(0)
+	logInfo("Alarmanlage.rules", "Simulation beendet")
+	
+	
 }
 end
 
 
 //Beide weg und es wird dunkel - Lichtspiele beginnen
 rule "Zeitschaltung Lichtspiele an" // Um 17:10 Uhr Lichter anmachen
-when Time cron "0 0/10 17 * * ?" // http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
+when Time cron "0 0/10 18 * * ?" // http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
 then
-if(aktiv==true){
+if(aktiv){
   Presence_Simulation_Switch.sendCommand("ON")
 }
 end
 
 
 rule "Zeitschaltung Lichtspiele aus"
-when Time cron "0 0/29 22 * * ?" // http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
+when Time cron "0 0/29 23 * * ?" // http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
 then
 if(aktiv==true){
-    DeskLamp.sendCommand("off")
+    Fernseher_LautstRke.sendCommand(0)
+    Badezimmer_LautstRke.sendCommand(0)
+	Wohnzimmer_LautstRke.sendCommand(0)
+    sendCommand(DeskLamp, "off")
     Schlafzimmer_Helligkeit.sendCommand(0)
     Kueche_Switch.sendCommand(0)
+    Erdgeschloss_Switch.sendCommand(OFF)
+    Kinderzimmer_Helligkeit.sendCommand(0)
+    sendCommand(Switch3, "off")
 }
 end

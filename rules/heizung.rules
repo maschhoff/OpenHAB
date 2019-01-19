@@ -8,22 +8,3 @@ then
 	sendCommand(Heizung_WZ_2,newState.toString)
 	sendCommand(Heizung_Kueche,newState.toString)
 end
-
-rule "Temperaturueberwachung Wohnzimmer"
-when Item Temp1_String received command
-then
-	logInfo("heizung.rules","Temperatur bei "+Temp1_String.state+" Heizung_WZ zu "+Heizung_WZ.state)
-
-	var heizung_int=16
-	if(Heizung_WZ.state!=NULL){
-		heizung_int=Integer::parseInt(Heizung_WZ.state.toString)
-	}
-	val temp1_int = Integer::parseInt(Temp1_String.state.toString)
-
-	if(temp1_int<heizung_int){
-		
-		sendCommand(Heizung_WZ_1,Heizung_WZ.toString)
-		sendCommand(Heizung_WZ_2,Heizung_WZ.toString)
-		sendCommand(Heizung_Kueche,Heizung_WZ.toString)
-	}
-end

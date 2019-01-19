@@ -1,4 +1,32 @@
+//Global Variables
 
+//Bewegung Küche Timer
+var Timer timer = null
+
+
+//Türklingel Push-Nachricht
+rule "Tuerklingel"
+when Item Bell_String received update
+then
+	logInfo("erdgeschoss.rules", "Türklingel betätigt!")
+	//pushover("Türklingel",2,null,null,"persistent")
+	//pushover("Türklingel",0)
+	sendPushoverMessage(pushoverBuilder("Türklingel"))
+	//sendPushoverMessage(pushoverBuilder("test message").withAttachment("/path/to/file.jpeg")) https://www.openhab.org/addons/actions/pushover/
+	
+	CastLRBAD_URI.sendCommand("http://192.168.0.81/tuerklingel.mp3")
+	CastLRWZ_URI.sendCommand("http://192.168.0.81/tuerklingel.mp3")
+	CastLRHR_URI.sendCommand("http://192.168.0.81/tuerklingel.mp3")
+	Badezimmer_LautstRke.sendCommand(50)
+	Wohnzimmer_LautstRke.sendCommand(50)
+	HobbyraumMini_LautstRke.sendCommand(50)
+    Badezimmer_Fernbedienung.sendCommand(PLAY)
+	Wohnzimmer_Fernbedienung.sendCommand(PLAY)
+	HobbyraumMini_Fernbedienung.sendCommand(PLAY)
+	//Badezimmer_LautstRke.sendCommand(50)
+	//Wohnzimmer_LautstRke.sendCommand(50)
+	//HobbyraumMini_LautstRke.sendCommand(50)
+end
 
 //Licht in Kueche und KuechenLeiste anstellen
 rule "Licht Kueche dann KuechenLeiste"
@@ -11,13 +39,38 @@ then
 	}
 end
 
+rule "Bewegungsmelderx"
+when Item Bewegung_x received command up
+then
+	Kueche_Helligkeit.sendCommand(100)
+	KuechenLeiste.sendCommand("on")
+	if(timer == null) {
+		logInfo("erdgeschoss.rules","Bewegung_x ON timer created")
+        timer = createTimer(now.plusMinutes(2), [|
+            logInfo("erdgeschoss.rules", "Timer expired and setting to OFF")
+            Kueche_Helligkeit.sendCommand(0)
+			KuechenLeiste.sendCommand("off")
+            timer = null
+        ])
+	} else {
+        logInfo("erdgeschoss.rules", "Timer rescheduled")
+        timer.reschedule(now.plusMinutes(2))
+    }
+end
+
+rule "Bewegungsmeldery"
+when Item Bewegung_y received command up
+then
+	logInfo("Bewegung_y")
+end
+
 //Generische Regeln für IFTTT / Google Assistant Phrase mit variablen zum Licht ausschalten
 rule "Generische Regeln für IFTTT Licht aus"
 when Item LightOff_String received update
 then
 
 	var auswahl=LightOff_String.state.toString
-	logInfo("wohnzimmer.rules", "Licht aus im Raum "+auswahl)
+	logInfo("erdgeschoss.rules", "Licht aus im Raum "+auswahl)
 	if(auswahl.contains("Küche")){
 		Kueche_Helligkeit.sendCommand(0)
 		KuechenLeiste.sendCommand("off")
@@ -33,6 +86,9 @@ then
 	}
 	if(auswahl.contains("Schlafzimmer")){
 		Schlafzimmer_Helligkeit.sendCommand(0)
+	}
+	if(auswahl.contains("Kinderzimmer")){
+		Kinderzimmer_Helligkeit.sendCommand(0)
 	}
 	if(auswahl.contains("Erdgeschoss")){
 		Erdgeschloss_Switch.sendCommand(OFF)
@@ -75,6 +131,9 @@ then
 	}
 	if(auswahl.contains("Schlafzimmer")){
 		Schlafzimmer_Helligkeit.sendCommand(dimmer)
+	}
+	if(auswahl.contains("Kinderzimmer")){
+		Kinderzimmer_Helligkeit.sendCommand(dimmer)
 	}
 	if(auswahl.contains("Erdgeschoss")){
 		Erdgeschloss_Switch.sendCommand(ON)

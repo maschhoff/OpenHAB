@@ -4,14 +4,18 @@ rule "Play Chrismas_Switch Rule"
 when Item Chrismas_Switch received update
 then
 if(Chrismas_Switch.state==ON){
-    DeskLamp.sendCommand("on")
-    Switch3.sendCommand("on")
+	logInfo("weihnachten.rules","Chrismas Switch ON")
+    sendCommand(Switch3, "on")
+    sendCommand(Switch1, "on")
+    sendCommand(DeskLamp, "on")
     CastLRTV_URI.sendCommand("http://de-hz-fal-stream05.rautemusik.fm/christmas")
     //Remote_TV.sendCommand("KEY_POWER")
 	Fernseher_Fernbedienung.sendCommand(PLAY)
 }else{ 
-	DeskLamp.sendCommand("off")
-	Switch3.sendCommand("off")
+	logInfo("weihnachten.rules","Chrismas Switch OFF")
+	sendCommand(Switch3, "off")
+	sendCommand(Switch1, "off")
+	sendCommand(DeskLamp, "off")
     Fernseher_Fernbedienung.sendCommand(STOP) 
 	//LgTvPower.sendCommand(on)
 }
@@ -23,13 +27,16 @@ end
 rule "Zeitschaltung_Weihnachtsbeleuchtung_an" // Um 17:10 Uhr Lichter anmachen
 when Time cron "0 0/27 16 * * ?" // http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
 then
-DeskLamp.sendCommand("on")
-Switch3.sendCommand("on")
+logInfo("weihnachten.rules","Zeitschaltung Weihnachten ON")
+sendCommand(DeskLamp, "on")
+//sendCommand(Switch1, "on")
+sendCommand(Switch3, "on")
 end
 
 rule "Zeitschaltung_Weihnachtsbeleuchtung_aus"
 when Time cron "0 0/29 22 * * ?" // http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
 then
-DeskLamp.sendCommand("off")
-Switch3.sendCommand("off")
+sendCommand(DeskLamp, "off")
+//sendCommand(Switch1, "off")
+sendCommand(Switch3, "off")
 end
