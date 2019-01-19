@@ -7,16 +7,17 @@ String Remote_FAN { channel="lirc:remote:local:FAN:transmit" }
 String Remote_SAUGER { channel="lirc:remote:local:SAUGER:transmit" }
 
 //CHROMECAST DEVICES - chromecast binding required
-String CastLRTV_URI { channel="chromecast:chromecast:cd54c8439aa543b87f2fa1db12d3b67e:playuri"}
-String CastLRWZ_URI { channel="chromecast:chromecast:e6514d4778d97e40db783e0ae575c511:playuri"}
+String CastLRTV_URI { channel="chromecast:chromecast:fdbb65a22a54547f5a479848f476552e:playuri"}
+String CastLRWZ_URI { channel="chromecast:chromecast:b7e8c355b18add0ed34bc58e53e193e0:playuri"}
 String CastLRBAD_URI { channel="chromecast:chromecast:62660b553e4d0ab2c8a2d30a91da787d:playuri"}
+String CastLRHR_URI { channel="chromecast:chromecast:f3f20bc0f862e80eafa6bca96e4c7051:playuri"}
 
 //PILIGHT DEVICES
 //SWITCHES
 String Switch1 { channel="exec:command:pilight-switch1:input"}  // Alter Switch 
 String KuechenLeiste { channel="exec:command:pilight-switch4:input"}
-String DeskLamp { channel="exec:command:pilight-switch2:input"} // aktuell Weihnachtslicht
-String Switch3 { channel="exec:command:pilight-switch3:input"} // aktuell Weihnachtsbaum
+String DeskLamp { channel="exec:command:pilight-switch2:input"} 
+String Switch3 { channel="exec:command:pilight-switch3:input"} 
 
 //TEMPERATUR, FENSTER, WETTER, HEIZUNG
 
@@ -26,12 +27,20 @@ String Temp2_String
 String Temp1_String_Humidity
 String Temp2_String_Humidity
 
-//FENSTER
+//Bewegungsmelder
+String Bewegung_x
+String Bewegung_y
+
+//FENSTER / TÜR / Klingel
 String Kuechenfenster "[MAP(de.map):%s]"
 String Wohnzimmerfenster_links "[MAP(de.map):%s]"
+String Wohnzimmerfenster_rechts "[MAP(de.map):%s]"
 String Kellertuer "[MAP(de.map):%s]"
 String Wintergartenfenster "[MAP(de.map):%s]"
 String Schlafzimmerfenster "[MAP(de.map):%s]"
+String Badezimmerfenster "[MAP(de.map):%s]"
+String Tuer "[MAP(de.map):%s]"
+String Bell_String "[MAP(de.map):%s]"
 
 //WETTER
 String Wetter_Info_Command { channel="exec:command:wetter:input"}
@@ -56,6 +65,9 @@ Switch Alarmanlage_ausloesen_Switch
 Switch Presence_Simulation_Switch
 Switch Matze_Away
 Switch Jessy_Away
+
+//SoundOfText
+String SoundOfText { channel="exec:command:smart-sot:input"}
 
 //MANUAL STRING FOR VOICE
 String LightOn_String
