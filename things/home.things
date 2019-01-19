@@ -1,7 +1,7 @@
 //THINGS CONFIG
 
 //LIRC BRIDGE - Lirc Binding required
-Bridge lirc:bridge:local [ host="10.10.10.123", port="8765" ] {
+Bridge lirc:bridge:local [ host="192.168.0.123", port="8765" ] {
     Thing remote LGA [ remote="LGA" ]
     Thing remote FAN [ remote="FAN" ]
     Thing remote SAUGER [ remote="SAUGER" ]
@@ -19,6 +19,9 @@ Thing exec:command:pilight-switch4 [command="/openhab/conf/scripts/pilight.sh Sw
 Thing exec:command:cometblue-wz-1 [command="/openhab/conf/scripts/cometblue.sh FB:19:25:9F:3D:BA %2$s", interval=0, autorun=true]
 Thing exec:command:cometblue-wz-2 [command="/openhab/conf/scripts/cometblue.sh BC:26:4E:C5:06:B8 %2$s", interval=0, autorun=true]
 Thing exec:command:cometblue-bad [command="/openhab/conf/scripts/cometblue.sh 85:99:F7:EF:71:D2 %2$s", interval=0, autorun=true]
+
+//Sound of Text
+Thing exec:command:smart-sot [command="/openhab/conf/scripts/speak.sh %2$s", interval=0, autorun=true]
 
 //Wetter
 Thing exec:command:wetter [command="/openhab/conf/scripts/wetter.sh", interval=60, autorun=true]
