@@ -2,15 +2,15 @@
 
 //LIRC DEVICES
 String Remote_TV { channel="lirc:remote:local:LGA:transmit" }
-Switch LgTvPower {lgtv="ON:lgtv:POWER"}
 String Remote_FAN { channel="lirc:remote:local:FAN:transmit" }
 String Remote_SAUGER { channel="lirc:remote:local:SAUGER:transmit" }
 
 //CHROMECAST DEVICES - chromecast binding required
-String CastLRTV_URI { channel="chromecast:chromecast:fdbb65a22a54547f5a479848f476552e:playuri"}
+String CastLRTV_URI { channel="chromecast:chromecast:ca5f38fb8ee8779f42a7674e3fc7cd43:playuri"}
 String CastLRWZ_URI { channel="chromecast:chromecast:b7e8c355b18add0ed34bc58e53e193e0:playuri"}
 String CastLRBAD_URI { channel="chromecast:chromecast:62660b553e4d0ab2c8a2d30a91da787d:playuri"}
 String CastLRHR_URI { channel="chromecast:chromecast:f3f20bc0f862e80eafa6bca96e4c7051:playuri"}
+String CastHRTV_URI { channel="chromecast:chromecast:c830d43adcfff5cd85224a07bb119244:playuri"}
 
 //PILIGHT DEVICES
 //SWITCHES
@@ -84,9 +84,11 @@ Switch Erdgeschloss_Switch
 Switch TV_Switch
 Switch Gemuetlich_Switch
 Switch Putzen_Switch
+Switch Flur_Switch
 
 //MANUAL DIMMERS FOR RULES
 Dimmer Wohnzimmer_Dimmer
 Dimmer Wohnzimmer_Farbe_Dimmer
 Dimmer Kueche_Dimmer
+Dimmer Flur_Dimmer
 
