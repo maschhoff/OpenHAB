@@ -2,6 +2,10 @@
 
 //Bewegung Küche Timer
 var Timer timer = null
+var boolean timer_stop=false
+
+//Tuer Licht
+var Timer timer_tuer = null
 
 
 //Türklingel Push-Nachricht
@@ -39,24 +43,7 @@ then
 	}
 end
 
-rule "Bewegungsmelderx"
-when Item Bewegung_x received command up
-then
-	Kueche_Helligkeit.sendCommand(100)
-	KuechenLeiste.sendCommand("on")
-	if(timer == null) {
-		logInfo("erdgeschoss.rules","Bewegung_x ON timer created")
-        timer = createTimer(now.plusMinutes(2), [|
-            logInfo("erdgeschoss.rules", "Timer expired and setting to OFF")
-            Kueche_Helligkeit.sendCommand(0)
-			KuechenLeiste.sendCommand("off")
-            timer = null
-        ])
-	} else {
-        logInfo("erdgeschoss.rules", "Timer rescheduled")
-        timer.reschedule(now.plusMinutes(2))
-    }
-end
+
 
 rule "Bewegungsmeldery"
 when Item Bewegung_y received command up
@@ -89,6 +76,13 @@ then
 	}
 	if(auswahl.contains("Kinderzimmer")){
 		Kinderzimmer_Helligkeit.sendCommand(0)
+	}
+	if(auswahl.contains("Flur")){
+		Flur1_Helligkeit.sendCommand(0)
+		Flur2_Helligkeit.sendCommand(0)
+	}
+	if(auswahl.contains("Arbeitszimmer")){
+		Arbeitszimmer_Helligkeit.sendCommand(0)
 	}
 	if(auswahl.contains("Erdgeschoss")){
 		Erdgeschloss_Switch.sendCommand(OFF)
@@ -135,6 +129,13 @@ then
 	if(auswahl.contains("Kinderzimmer")){
 		Kinderzimmer_Helligkeit.sendCommand(dimmer)
 	}
+	if(auswahl.contains("Flur")){
+		Flur1_Helligkeit.sendCommand(dimmer)
+		Flur2_Helligkeit.sendCommand(dimmer)
+	}
+	if(auswahl.contains("Arbeitszimmer")){
+		Arbeitszimmer_Helligkeit.sendCommand(dimmer)
+	}
 	if(auswahl.contains("Erdgeschoss")){
 		Erdgeschloss_Switch.sendCommand(ON)
 	}
@@ -164,7 +165,13 @@ if(Erdgeschloss_Switch.state==ON){
 	DeskLamp.sendCommand("off")
 	Switch3.sendCommand("off")
 	Heizung_WZ.sendCommand("17")
-	sendCommand(LgTvPower,ON)
+	//Flurlicht an
+	Flur1_Helligkeit.sendCommand(30)
+	Flur2_Helligkeit.sendCommand(30)
+	Thread::sleep(500000)
+	Flur1_Helligkeit.sendCommand(0)
+	Flur2_Helligkeit.sendCommand(0)
+	
 }
 end
 
@@ -182,7 +189,8 @@ if(TV_Switch.state==ON){
     	Stehlampe_Helligkeit.sendCommand(30)
 	}
 }else{
-	sendCommand(LgTvPower,ON)
+	Remote_TV.sendCommand("KEY_POWER")
+	//sendCommand(hisense,ON)
 	if(now.getHourOfDay>Integer::parseInt(Sunset_Number.state.toString)){
 		Tisch_Helligkeit.sendCommand(80)
 		Stehlampe_Helligkeit.sendCommand(80)
@@ -210,7 +218,7 @@ when Item Gemuetlich_Switch received update
 then
 Tisch_Helligkeit.sendCommand(20)
 Stehlampe_Helligkeit.sendCommand(30)
-Kueche_Helligkeit.sendCommand(20)
+Kueche_Helligkeit.sendCommand(0)
 Tisch_Farbtemperatur.sendCommand(100)
 Stehlampe_Farbtemperatur.sendCommand(100)
 end
@@ -226,18 +234,88 @@ Tisch_Farbtemperatur.sendCommand(0)
 Stehlampe_Farbtemperatur.sendCommand(0)
 end
 
+//Licht an wenn Tür auf
+rule "Tuer auf Licht an"
+when Item Tuer received command opened
+then 
+    logInfo("Erdgeschoss.rules", "Tuer wurde geöffnet")
+	if(Sunset_Number.state===null || now.getHourOfDay+1>=Integer::parseInt(Sunset_Number.state.toString) || now.getHourOfDay<=Integer::parseInt(Sunrise_Number.state.toString)){ 
+			sendCommand(Flur1_Helligkeit,100)
+			sendCommand(Flur2_Helligkeit,100)
+	}
+	
+	
+	//Timer
+	if(timer_tuer === null) {
+		logInfo("erdgeschoss.rules","Tuer ON timer created")
+        timer_tuer = createTimer(now.plusMinutes(5), [|
+            logInfo("erdgeschoss.rules", "Tuer Timer expired and setting to OFF")
+			sendCommand(Flur1_Helligkeit,0)
+			sendCommand(Flur2_Helligkeit,0)
+            timer_tuer = null
+        ])
+	} else {
+        logInfo("erdgeschoss.rules", "Tuer Timer rescheduled")
+        timer_tuer.reschedule(now.plusMinutes(5))
+    }
+	
+end
+
+
+rule "Bewegungsmelderx"
+when Item Bewegung_x received command up
+then
+	logInfo("erdgeschoss.rules", "Infos:"+Sunrise_Number.state+" "+now.getHourOfDay)
+	if(Sunset_Number.state===null || now.getHourOfDay+1>=Integer::parseInt(Sunset_Number.state.toString) || now.getHourOfDay<=Integer::parseInt(Sunrise_Number.state.toString)){ 
+		Kueche_Helligkeit.sendCommand(100)
+		KuechenLeiste.sendCommand("on")
+	}
+	if(timer === null) {
+		logInfo("erdgeschoss.rules","Bewegung_x ON timer created")
+        timer = createTimer(now.plusMinutes(2), [|
+            logInfo("erdgeschoss.rules", "Timer expired and setting to OFF")
+			//wenn der timer nicht manuell gestoppt ist...
+			if(!timer_stop){
+				Kueche_Helligkeit.sendCommand(0)
+				KuechenLeiste.sendCommand("off")
+			}
+            timer = null
+        ])
+	} else {
+        logInfo("erdgeschoss.rules", "Timer rescheduled")
+        timer.reschedule(now.plusMinutes(2))
+    }
+end
+
+
 //Licht an aus in der Kueche
 rule "Kueche Switch Rule"
 when Item Kueche_Switch received update
 then
 if(Kueche_Switch.state==ON){
+	timer_stop=true
     Kueche_Helligkeit.sendCommand(100)
 	KuechenLeiste.sendCommand("on")
 }else{
+	timer_stop=false
 	Kueche_Helligkeit.sendCommand(0)
 	KuechenLeiste.sendCommand("off")
 }
 end
+
+//Licht an aus im Flur
+rule "Flur Switch Rule"
+when Item Flur_Switch received update
+then
+if(Flur_Switch.state==ON){
+	Flur1_Helligkeit.sendCommand(100)
+	Flur2_Helligkeit.sendCommand(100)
+}else{
+	Flur1_Helligkeit.sendCommand(0)
+	Flur2_Helligkeit.sendCommand(0)
+}
+end
+
 
 //Licht dimmen in der Kueche
 rule "Kueche Dimmer Rule"
@@ -246,7 +324,20 @@ then
 	val newState = Kueche_Dimmer.state
 	logInfo("wohnzimmer.rules", "Kueche_Dimmer zu "+newState)
 	sendCommand(Kueche_Helligkeit,newState.toString)
-	KuechenLeiste.sendCommand("off")
+	if(newState<50){ 
+		KuechenLeiste.sendCommand("off")
+	}
+end
+
+
+//Licht dimmen im Flur
+rule "Flur Dimmer Rule"
+when Item Flur_Dimmer received command
+then
+	val newState = Flur_Dimmer.state
+	logInfo("wohnzimmer.rules", "Flur_Dimmer zu "+newState)
+	sendCommand(Flur1_Helligkeit,newState.toString)
+	sendCommand(Flur2_Helligkeit,newState.toString)
 end
 
 //Licht dimmen im Wohnzimmer
@@ -268,3 +359,5 @@ then
 	sendCommand(Tisch_Farbtemperatur,newState.toString)
 	sendCommand(Stehlampe_Farbtemperatur,newState.toString)
 end
+
+

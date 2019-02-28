@@ -17,7 +17,8 @@ if(Chrismas_Switch.state==ON){
 	sendCommand(Switch1, "off")
 	sendCommand(DeskLamp, "off")
     Fernseher_Fernbedienung.sendCommand(STOP) 
-	//LgTvPower.sendCommand(on)
+	//hisense.sendCommand(on)
+	Remote_TV.sendCommand("KEY_POWER")
 }
 end
 
