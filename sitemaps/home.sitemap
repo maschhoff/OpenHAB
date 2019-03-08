@@ -1,0 +1,35 @@
+sitemap home label="Home" {
+
+
+    Frame {
+        Text label="Licht" icon="light" {
+            Default item=Flur_Switch label="Flur"
+			Default item=Wohnzimmer_Switch label="Wohnzimmer"
+			Default item=Erdgeschloss_Switch label="Erdgeschloss"
+			Default item=Gemuetlich_Switch label="Gemütlich"
+			Default item=Putzen_Switch label="Putzen"
+			Default item=Kueche_Switch label="Küche"
+			Default item=Wohnzimmer_Dimmer label="Wohnzimmer"
+			Default item=Kueche_Dimmer label="Küche"
+			Switch item=Schlafzimmer_Helligkeit label="Schlafzimmer" mappings=[100="ON", 0="OFF"]
+			Switch item=Kinderzimmer_Helligkeit label="Kinderzimmer" mappings=[100="ON", 0="OFF"]
+			Switch item=Arbeitszimmer_Helligkeit label="Arbeitszimmer" mappings=[100="ON", 0="OFF"]
+			Default item=Arbeitszimmer_Helligkeit label="Arbeitszimmer"
+        }
+		Text label="Alarmanlage" icon="motion" {
+            Default item=Alarmanlage_Switch label="Alarmanlage"
+			Webview url="http://192.168.0.87:8765/" height=15 label="Camera" icon="camera"
+        }
+		Text label="Heizung" icon="temperature" {
+            Text item=Temp1_String label="Erdgeschloss []" icon="temperature"
+			Text item=Temp2_String label="Schlafzimmer []"  icon="temperature"
+			Setpoint item=Heizung_WZ label="Kitchen [%.1f °C]" minValue=15 maxValue=23 step=0.5
+			
+        }
+		Text label="Multimedia" icon="video" {
+			Default item=TV_Switch label="Fernsehr"
+			Default item=Music_Switch label="Musik"
+			Webview url="http://192.168.0.42:6680/musicbox_webclient/index.html#nowPlaying" height=15 label="Musik" icon="video"
+        }
+    }
+}
