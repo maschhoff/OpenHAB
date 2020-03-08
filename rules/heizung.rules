@@ -8,3 +8,27 @@ then
 	sendCommand(Heizung_WZ_2,newState.toString)
 	sendCommand(Heizung_Kueche,newState.toString)
 end
+
+
+//Fensterkontakte - Warnung nach 30 min
+rule "Fenster auf timer an"
+when Item Kuechenfenster received command opened or
+    Item Wohnzimmerfenster_links received command opened or
+    Item Wohnzimmerfenster_rechts received command opened or
+    Item Kellertuer received command opened or
+    Item Wintergartenfenster received command opened or
+	Item Badezimmerfenster received command opened or
+    Item Schlafzimmerfenster received command opened
+then 
+    logInfo("Heizung.rules", "Fenster wurde geöffnet "+triggeringItem.name)
+
+	var String fenster=""+triggeringItem.name
+    //Timer
+	Timer timer = createTimer(now.plusMinutes(30), [|
+				logInfo("heizung.rules", "Timer expired send notification to close window")
+				//Notification
+				sendPushoverMessage(pushoverBuilder(fenster+" schließen!"))
+   			    sendNotification("aschhoff@cmais.de", fenster+" schließen!")
+				sendCommand(SoundOfText, fenster+"%20ist%20noch%20offen")
+			])
+end

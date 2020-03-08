@@ -4,6 +4,9 @@
 var Timer timer = null
 var boolean timer_stop=false
 
+//Bewegung Flur Timer
+var Timer timer2 = null
+
 //Tuer Licht
 var Timer timer_tuer = null
 
@@ -12,24 +15,30 @@ var Timer timer_tuer = null
 rule "Tuerklingel"
 when Item Bell_String received update
 then
+
 	logInfo("erdgeschoss.rules", "Türklingel betätigt!")
-	//pushover("Türklingel",2,null,null,"persistent")
-	//pushover("Türklingel",0)
-	sendPushoverMessage(pushoverBuilder("Türklingel"))
-	//sendPushoverMessage(pushoverBuilder("test message").withAttachment("/path/to/file.jpeg")) https://www.openhab.org/addons/actions/pushover/
-	
-	CastLRBAD_URI.sendCommand("http://192.168.0.81/tuerklingel.mp3")
-	CastLRWZ_URI.sendCommand("http://192.168.0.81/tuerklingel.mp3")
-	CastLRHR_URI.sendCommand("http://192.168.0.81/tuerklingel.mp3")
-	Badezimmer_LautstRke.sendCommand(50)
-	Wohnzimmer_LautstRke.sendCommand(50)
-	HobbyraumMini_LautstRke.sendCommand(50)
-    Badezimmer_Fernbedienung.sendCommand(PLAY)
-	Wohnzimmer_Fernbedienung.sendCommand(PLAY)
-	HobbyraumMini_Fernbedienung.sendCommand(PLAY)
-	//Badezimmer_LautstRke.sendCommand(50)
-	//Wohnzimmer_LautstRke.sendCommand(50)
-	//HobbyraumMini_LautstRke.sendCommand(50)
+
+	if(Bell_Switch.state==OFF){
+		logInfo("erdgeschoss.rules", "Türklingel ausgeschaltet")	
+	}else{
+    
+		logInfo("erdgeschoss.rules", "Türklingel an")
+
+		sendPushoverMessage(pushoverBuilder("Türklingel"))
+		sendNotification("aschhoff@cmais.de", "Türklingel")
+		//Foto dazu senden - sendPushoverMessage(pushoverBuilder("test message").withAttachment("/path/to/file.jpeg")) https://www.openhab.org/addons/actions/pushover/
+		
+		CastLRBAD_URI.sendCommand("http://192.168.0.81/tuerklingel.mp3")
+		CastLRWZ_URI.sendCommand("http://192.168.0.81/tuerklingel.mp3")
+		CastLRHR_URI.sendCommand("http://192.168.0.81/tuerklingel.mp3")
+		Badezimmer_LautstRke.sendCommand(50)
+		Wohnzimmer_LautstRke.sendCommand(50)
+		HobbyraumMini_LautstRke.sendCommand(50)
+		Badezimmer_Fernbedienung.sendCommand(PLAY)
+		Wohnzimmer_Fernbedienung.sendCommand(PLAY)
+		HobbyraumMini_Fernbedienung.sendCommand(PLAY)
+
+	}
 end
 
 //Licht in Kueche und KuechenLeiste anstellen
@@ -43,12 +52,49 @@ then
 	}
 end
 
+//Licht in Küche um 00:00 ausstellen, falls angelassen.
+rule "Zeitschaltung_Weihnachtsbeleuchtung_aus"
+when Time cron "0 0 0 * * ?" 
+then
+logInfo("erdgeschoss.rules","Zeitschaltung Küchenlicht OFF")
+Kueche_Switch.sendCommand("off")
+end
 
 
+//Flut bewegung
 rule "Bewegungsmeldery"
 when Item Bewegung_y received command up
 then
-	logInfo("Bewegung_y")
+logInfo("erdgeschoss.rules","Bewegung Flur")
+		logInfo("erdgeschoss.rules", "Flur Infos:"+Sunrise_Number.state+" "+now.getHourOfDay)
+
+	//Tagsüber den Bewegungsmelder aktivieren und nachts ignorieren.
+	if(now.getHourOfDay<23 || now.getHourOfDay>6){
+		logInfo("erdgeschoss.rules", "Flur ausgelöst:"+Sunrise_Number.state+" "+now.getHourOfDay)
+
+		Flur1_Helligkeit.sendCommand(100)
+		Flur2_Helligkeit.sendCommand(100)
+		
+		//Timer mit 5 Minuten danach geht das Licht wieder aus
+		if(timer2 === null) {
+			logInfo("erdgeschoss.rules","Bewegung_y ON timer2 created")
+			timer2 = createTimer(now.plusMinutes(5), [|
+				logInfo("erdgeschoss.rules", "Timer2 expired and setting to OFF")
+				//wenn der timer2 nicht manuell gestoppt ist...
+				Flur1_Helligkeit.sendCommand(0)
+				Flur2_Helligkeit.sendCommand(0)
+				timer2 = null
+			])
+		} else {
+			logInfo("erdgeschoss.rules", "Timer rescheduled")
+			timer2.reschedule(now.plusMinutes(5))
+			Flur1_Helligkeit.sendCommand(100)
+			Flur2_Helligkeit.sendCommand(100)
+		}
+
+	}
+
+	
 end
 
 //Generische Regeln für IFTTT / Google Assistant Phrase mit variablen zum Licht ausschalten
@@ -265,6 +311,7 @@ end
 rule "Bewegungsmelderx"
 when Item Bewegung_x received command up
 then
+logInfo("erdgeschoss.rules","Bewegung Küche")
 	logInfo("erdgeschoss.rules", "Infos:"+Sunrise_Number.state+" "+now.getHourOfDay)
 	if(Sunset_Number.state===null || now.getHourOfDay+1>=Integer::parseInt(Sunset_Number.state.toString) || now.getHourOfDay<=Integer::parseInt(Sunrise_Number.state.toString)){ 
 		Kueche_Helligkeit.sendCommand(100)
@@ -284,6 +331,8 @@ then
 	} else {
         logInfo("erdgeschoss.rules", "Timer rescheduled")
         timer.reschedule(now.plusMinutes(2))
+		Kueche_Helligkeit.sendCommand(100)
+		KuechenLeiste.sendCommand("on")
     }
 end
 

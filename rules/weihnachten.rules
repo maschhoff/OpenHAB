@@ -5,39 +5,50 @@ when Item Chrismas_Switch received update
 then
 if(Chrismas_Switch.state==ON){
 	logInfo("weihnachten.rules","Chrismas Switch ON")
-    sendCommand(Switch3, "on")
-    sendCommand(Switch1, "on")
-    sendCommand(DeskLamp, "on")
+    Switch1.sendCommand("on")
+	Thread::sleep(1000) 
+	Switch3.sendCommand("on")
+	Thread::sleep(1000) 
+    DeskLamp.sendCommand("on")
     CastLRTV_URI.sendCommand("http://de-hz-fal-stream05.rautemusik.fm/christmas")
     //Remote_TV.sendCommand("KEY_POWER")
-	Fernseher_Fernbedienung.sendCommand(PLAY)
+	//Fernseher_Fernbedienung.sendCommand(PLAY)
 }else{ 
 	logInfo("weihnachten.rules","Chrismas Switch OFF")
-	sendCommand(Switch3, "off")
-	sendCommand(Switch1, "off")
-	sendCommand(DeskLamp, "off")
+	Switch1.sendCommand("off")
+	Thread::sleep(1000) 
+	Switch3.sendCommand("off")
+	Thread::sleep(1000) 
+	DeskLamp.sendCommand("off")
     Fernseher_Fernbedienung.sendCommand(STOP) 
 	//hisense.sendCommand(on)
-	Remote_TV.sendCommand("KEY_POWER")
+	//Remote_TV.sendCommand("KEY_POWER")
 }
 end
 
 
 // Zeitschaltungen
-
-rule "Zeitschaltung_Weihnachtsbeleuchtung_an" // Um 17:10 Uhr Lichter anmachen
-when Time cron "0 0/27 16 * * ?" // http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
+// 6:00 AN
+rule "Zeitschaltung_Weihnachtsbeleuchtung_an" 
+when Time cron "0 0 6 * * ?"// http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html
+or  Time cron "0 30 16 * * ?" //
 then
 logInfo("weihnachten.rules","Zeitschaltung Weihnachten ON")
-sendCommand(DeskLamp, "on")
-//sendCommand(Switch1, "on")
-sendCommand(Switch3, "on")
+Switch1.sendCommand("on")
+Thread::sleep(1000) 
+Switch3.sendCommand("on")
 end
 
+
+// 8:30 AUS
 rule "Zeitschaltung_Weihnachtsbeleuchtung_aus"
-when Time cron "0 0/29 22 * * ?" // http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
+when Time cron "0 30 8 * * ?" 
+or Time cron "0 0 23 * * ?" 
 then
-sendCommand(DeskLamp, "off")
-//sendCommand(Switch1, "off")
-sendCommand(Switch3, "off")
+logInfo("weihnachten.rules","Zeitschaltung Weihnachten OFF")
+Switch1.sendCommand("off")
+Thread::sleep(1000) 
+Switch3.sendCommand("off")
 end
+
+

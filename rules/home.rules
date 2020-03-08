@@ -18,4 +18,5 @@ then
     Temp1_String_Humidity.sendCommand("50")
     Wetter_Info_Command.sendCommand("ON")
     Alarmanlage_Switch.sendCommand("OFF")
+    Bell_Switch.sendCommand("ON")
 end
