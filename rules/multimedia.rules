@@ -1,0 +1,17 @@
+//Musik überall an aus
+rule "Musik Switch Rule"
+when Item Music_Switch received update
+then
+if(Music_Switch.state==ON){
+	CastLRTV_URI.sendCommand("http://192.168.0.43:8000/mopidy")
+	CastHRTV_URI.sendCommand("http://192.168.0.43:8000/mopidy")
+	CastLRBAD_URI.sendCommand("http://192.168.0.43:8000/mopidy")
+}else{
+	CastLRTV_URI.sendCommand("")
+	CastHRTV_URI.sendCommand("")
+	CastLRBAD_URI.sendCommand("")
+}
+end
+
+
+

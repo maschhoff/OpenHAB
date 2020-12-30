@@ -1,3 +1,5 @@
+var Timer timer =null
+
 //Temperatur im Wohnzimmer steuern
 rule "Wohnzimmertemperatur"
 when Item Heizung_WZ received command
@@ -10,6 +12,40 @@ then
 end
 
 
+
+//Fensterkontakte - Warnung nach 30 min
+rule "Fenster auf timer an"
+when Item Kuechenfenster received command  or
+    Item Wohnzimmerfenster_links received command  or
+    Item Wohnzimmerfenster_rechts received command  or
+    Item Kellertuer received command  or
+    Item Wintergartenfenster received command  or
+	Item Badezimmerfenster received command  or
+    Item Schlafzimmerfenster received command 
+then 
+    logInfo("Heizung.rules", "Fenster wurde "+receivedCommand+" "+triggeringItem.name)
+
+	var String fenster=""+triggeringItem.name
+	var String status=""+receivedCommand
+
+	if(status=="opened"){
+		logInfo("Heizung.rules", "Fenstertimer an")
+		//Timer
+		timer = createTimer(now.plusMinutes(30), [|
+					logInfo("Heizung.rules", "Timer expired send notification to close window "+fenster)
+					//Notification
+					//sendPushoverMessage(pushoverBuilder(fenster+" schließen!"))
+					sendNotification("aschhoff@cmais.de", fenster+" schließen!")
+					sendCommand(SoundOfText, fenster+"%20ist%20noch%20offen")
+				])
+
+
+	}else{
+		logInfo("Heizung.rules", "Fenstertimer aus "+fenster)
+		timer.cancel()
+	}
+
+end
 //Fensterkontakte - Warnung nach 30 min
 rule "Fenster auf timer an"
 when Item Kuechenfenster received command opened or
@@ -20,7 +56,7 @@ when Item Kuechenfenster received command opened or
 	Item Badezimmerfenster received command opened or
     Item Schlafzimmerfenster received command opened
 then 
-    logInfo("Heizung.rules", "Fenster wurde geöffnet "+triggeringItem.name)
+    logInfo("Heizung.rules", "Fenster wurde "+receivedCommand+" "+triggeringItem.name)
 
 	var String fenster=""+triggeringItem.name
     //Timer

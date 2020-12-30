@@ -24,19 +24,28 @@ then
     
 		logInfo("erdgeschoss.rules", "Türklingel an")
 
-		sendPushoverMessage(pushoverBuilder("Türklingel"))
+
+                val actions = getActions("pushover", "pushover:pushover-account:account")
+		actions.sendMessage("Türklingel","openHAB") 
 		sendNotification("aschhoff@cmais.de", "Türklingel")
 		//Foto dazu senden - sendPushoverMessage(pushoverBuilder("test message").withAttachment("/path/to/file.jpeg")) https://www.openhab.org/addons/actions/pushover/
 		
-		CastLRBAD_URI.sendCommand("http://192.168.0.81/tuerklingel.mp3")
-		CastLRWZ_URI.sendCommand("http://192.168.0.81/tuerklingel.mp3")
-		CastLRHR_URI.sendCommand("http://192.168.0.81/tuerklingel.mp3")
+		//Cast sound at 50 and play
+		CastLRBAD_URI.sendCommand("http://192.168.0.80/tuerklingel.mp3")
+		CastLRWZ_URI.sendCommand("http://192.168.0.80/tuerklingel.mp3")
+		CastLRHR_URI.sendCommand("http://192.168.0.80/tuerklingel.mp3")
 		Badezimmer_LautstRke.sendCommand(50)
 		Wohnzimmer_LautstRke.sendCommand(50)
 		HobbyraumMini_LautstRke.sendCommand(50)
 		Badezimmer_Fernbedienung.sendCommand(PLAY)
 		Wohnzimmer_Fernbedienung.sendCommand(PLAY)
 		HobbyraumMini_Fernbedienung.sendCommand(PLAY)
+
+		//Ignore for one minute
+		Bell_Switch.sendCommand("OFF")
+		Timer timer = createTimer(now.plusMinutes(1), [|
+				Bell_Switch.sendCommand("ON")
+			])
 
 	}
 end
@@ -61,7 +70,7 @@ Kueche_Switch.sendCommand("off")
 end
 
 
-//Flut bewegung
+//Flur bewegung
 rule "Bewegungsmeldery"
 when Item Bewegung_y received command up
 then
@@ -312,11 +321,11 @@ rule "Bewegungsmelderx"
 when Item Bewegung_x received command up
 then
 logInfo("erdgeschoss.rules","Bewegung Küche")
-	logInfo("erdgeschoss.rules", "Infos:"+Sunrise_Number.state+" "+now.getHourOfDay)
-	if(Sunset_Number.state===null || now.getHourOfDay+1>=Integer::parseInt(Sunset_Number.state.toString) || now.getHourOfDay<=Integer::parseInt(Sunrise_Number.state.toString)){ 
+	//logInfo("erdgeschoss.rules", "Infos:"+Sunrise_Number.state+" "+now.getHourOfDay)
+	//if(Sunset_Number.state===null || now.getHourOfDay+1>=Integer::parseInt(Sunset_Number.state.toString) || now.getHourOfDay<=Integer::parseInt(Sunrise_Number.state.toString)){ 
 		Kueche_Helligkeit.sendCommand(100)
 		KuechenLeiste.sendCommand("on")
-	}
+	//}
 	if(timer === null) {
 		logInfo("erdgeschoss.rules","Bewegung_x ON timer created")
         timer = createTimer(now.plusMinutes(2), [|
