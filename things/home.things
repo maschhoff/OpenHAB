@@ -7,6 +7,13 @@ Bridge lirc:bridge:local [ host="192.168.0.123", port="8765" ] {
     Thing remote SAUGER [ remote="SAUGER" ]
 }
 
+
+Thing pushover:pushover-account:account [ apikey="xxx", user="xxx", title="openHAB" ]
+
+Bridge tradfri:gateway:gwdcefcabcf933 [ host="192.168.100.251", identity="xxx", preSharedKey="xxx" ] {}
+
+
+
 //EXEC COMMANDS - EXEC Binding required
 
 //PILIGHT
