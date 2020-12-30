@@ -5,5 +5,5 @@ I am using a Server and a RasperryPi so I have to send everything within my loca
 Thats why I am using wget to call this. wget -qO- has no output you can use curl but the official docker of openhab2 does not have curl. Have a look at github/cometblue/HeizungsServer for more ideas how to connect openHAB and another device.
 
 
-# ! Note 
+# Note 
 add all the scripts to misc/exec.whitelist
