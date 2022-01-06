@@ -10,6 +10,46 @@ var Timer timer2 = null
 //Tuer Licht
 var Timer timer_tuer = null
 
+//TRADFRIremote toggle
+var boolean toggle=false
+
+
+//TRADFRIremote
+rule "TRADFRIremote toggle"
+when
+    Item TRADFRIremoteaAction changed
+then
+    val value = transform("JSONPATH", "$.action", TRADFRIremoteaAction.state.toString)
+    logInfo("erdgeschoss.rules", "TRADFRIremote "+value)
+	
+	switch(value){
+		case "toggle":
+			if(toggle){
+				//Switch on
+				Erdgeschloss_Switch.sendCommand("ON")
+				toggle=false
+			}else{
+				//Switch off
+				Erdgeschloss_Switch.sendCommand("OFF")
+				toggle=true
+			}
+		case "brightness_up_click":{
+			//Helligkeit up
+			val currentState = (Wohnzimmer_Dimmer.state as Number).intValue
+			Wohnzimmer_Dimmer.sendCommand(currentState+10)
+			}
+		case "brightness_down_click":{
+			//Helligkeit down
+			val currentState = (Wohnzimmer_Dimmer.state as Number).intValue
+			Wohnzimmer_Dimmer.sendCommand(currentState-10)
+			}
+		case "arrow_right_click":
+			logInfo("erdgeschoss.rules", "TRADFRIremote no action on arrow_right_click")
+		case "arrow_left_click":
+			logInfo("erdgeschoss.rules", "TRADFRIremote no action on arrow_left_click")
+	}
+end
+
 
 //Türklingel Push-Nachricht
 rule "Tuerklingel"
@@ -23,17 +63,18 @@ then
 	}else{
     
 		logInfo("erdgeschoss.rules", "Türklingel an")
-
-
-                val actions = getActions("pushover", "pushover:pushover-account:account")
-		actions.sendMessage("Türklingel","openHAB") 
+		
+		//Pushnotify
 		sendNotification("aschhoff@cmais.de", "Türklingel")
-		//Foto dazu senden - sendPushoverMessage(pushoverBuilder("test message").withAttachment("/path/to/file.jpeg")) https://www.openhab.org/addons/actions/pushover/
+		val actions = getActions("pushover", "pushover:pushover-account:account")
+		actions.sendMessage("Türklingel","openHAB") 
+		
+
 		
 		//Cast sound at 50 and play
-		CastLRBAD_URI.sendCommand("http://192.168.0.80/tuerklingel.mp3")
-		CastLRWZ_URI.sendCommand("http://192.168.0.80/tuerklingel.mp3")
-		CastLRHR_URI.sendCommand("http://192.168.0.80/tuerklingel.mp3")
+		CastLRBAD_URI.sendCommand("https://server.little-devil.de/ldp/tuerklingel.mp3")
+		CastLRWZ_URI.sendCommand("https://server.little-devil.de/ldp/tuerklingel.mp3")
+		CastLRHR_URI.sendCommand("https://server.little-devil.de/ldp/tuerklingel.mp3")
 		Badezimmer_LautstRke.sendCommand(50)
 		Wohnzimmer_LautstRke.sendCommand(50)
 		HobbyraumMini_LautstRke.sendCommand(50)
@@ -46,6 +87,7 @@ then
 		Timer timer = createTimer(now.plusMinutes(1), [|
 				Bell_Switch.sendCommand("ON")
 			])
+                       
 
 	}
 end
@@ -72,14 +114,14 @@ end
 
 //Flur bewegung
 rule "Bewegungsmeldery"
-when Item Bewegung_y received command up
+when Item Bewegung_y received command opened
 then
 logInfo("erdgeschoss.rules","Bewegung Flur")
-		logInfo("erdgeschoss.rules", "Flur Infos:"+Sunrise_Number.state+" "+now.getHourOfDay)
+		logInfo("erdgeschoss.rules", "Flur Infos:"+Sunrise_Number.state+" "+now.getHour)
 
 	//Tagsüber den Bewegungsmelder aktivieren und nachts ignorieren.
-	if(now.getHourOfDay<23 || now.getHourOfDay>6){
-		logInfo("erdgeschoss.rules", "Flur ausgelöst:"+Sunrise_Number.state+" "+now.getHourOfDay)
+	if(now.getHour<23 || now.getHour>6){
+		logInfo("erdgeschoss.rules", "Flur ausgelöst:"+Sunrise_Number.state+" "+now.getHour)
 
 		Flur1_Helligkeit.sendCommand(100)
 		Flur2_Helligkeit.sendCommand(100)
@@ -294,7 +336,7 @@ rule "Tuer auf Licht an"
 when Item Tuer received command opened
 then 
     logInfo("Erdgeschoss.rules", "Tuer wurde geöffnet")
-	if(Sunset_Number.state===null || now.getHourOfDay+1>=Integer::parseInt(Sunset_Number.state.toString) || now.getHourOfDay<=Integer::parseInt(Sunrise_Number.state.toString)){ 
+	if(Sunset_Number.state===null || now.getHour+1>=Integer::parseInt(Sunset_Number.state.toString) || now.getHour<=Integer::parseInt(Sunrise_Number.state.toString)){ 
 			sendCommand(Flur1_Helligkeit,100)
 			sendCommand(Flur2_Helligkeit,100)
 	}
@@ -318,18 +360,18 @@ end
 
 
 rule "Bewegungsmelderx"
-when Item Bewegung_x received command up
+when Item Bewegung_x received command
 then
-logInfo("erdgeschoss.rules","Bewegung Küche")
+//logInfo("erdgeschoss.rules","Bewegung Küche")
 	//logInfo("erdgeschoss.rules", "Infos:"+Sunrise_Number.state+" "+now.getHourOfDay)
 	//if(Sunset_Number.state===null || now.getHourOfDay+1>=Integer::parseInt(Sunset_Number.state.toString) || now.getHourOfDay<=Integer::parseInt(Sunrise_Number.state.toString)){ 
 		Kueche_Helligkeit.sendCommand(100)
 		KuechenLeiste.sendCommand("on")
 	//}
 	if(timer === null) {
-		logInfo("erdgeschoss.rules","Bewegung_x ON timer created")
+		//logInfo("erdgeschoss.rules","Bewegung_x ON timer created")
         timer = createTimer(now.plusMinutes(2), [|
-            logInfo("erdgeschoss.rules", "Timer expired and setting to OFF")
+            //logInfo("erdgeschoss.rules", "Timer expired and setting to OFF")
 			//wenn der timer nicht manuell gestoppt ist...
 			if(!timer_stop){
 				Kueche_Helligkeit.sendCommand(0)
@@ -338,7 +380,7 @@ logInfo("erdgeschoss.rules","Bewegung Küche")
             timer = null
         ])
 	} else {
-        logInfo("erdgeschoss.rules", "Timer rescheduled")
+        //logInfo("erdgeschoss.rules", "Timer rescheduled")
         timer.reschedule(now.plusMinutes(2))
 		Kueche_Helligkeit.sendCommand(100)
 		KuechenLeiste.sendCommand("on")
